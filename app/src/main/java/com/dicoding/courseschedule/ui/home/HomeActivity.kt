@@ -7,8 +7,11 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.dicoding.courseschedule.R
 import com.dicoding.courseschedule.data.Course
+import com.dicoding.courseschedule.ui.add.AddCourseActivity
+import com.dicoding.courseschedule.ui.list.ListActivity
 import com.dicoding.courseschedule.ui.setting.SettingsActivity
 import com.dicoding.courseschedule.util.DayName
 import com.dicoding.courseschedule.util.QueryType
@@ -26,6 +29,12 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_home)
         supportActionBar?.title = resources.getString(R.string.today_schedule)
 
+        val factory = HomeViewModelFactory.createFactory(this)
+        viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
+        viewModel.getNearestSchedule(queryType).observe(this){course ->
+            showTodaySchedule(course)
+        }
+
     }
 
     private fun showTodaySchedule(course: Course?) {
@@ -37,6 +46,11 @@ class HomeActivity : AppCompatActivity() {
 
             val cardHome = findViewById<CardHomeView>(R.id.view_home)
 
+            cardHome.setCourseName(courseName)
+            cardHome.setTime(time)
+            cardHome.setRemainingTime(remainingTime)
+            cardHome.setLecturer(lecturer)
+            cardHome.setNote(note)
         }
 
         findViewById<TextView>(R.id.tv_empty_home).visibility =
@@ -64,6 +78,8 @@ class HomeActivity : AppCompatActivity() {
         val intent: Intent = when (item.itemId) {
 
             R.id.action_settings -> Intent(this, SettingsActivity::class.java)
+            R.id.action_add -> Intent(this, AddCourseActivity::class.java)
+            R.id.action_list -> Intent(this, ListActivity::class.java)
             else -> null
         } ?: return super.onOptionsItemSelected(item)
 
